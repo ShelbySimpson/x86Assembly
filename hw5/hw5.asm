@@ -7,9 +7,9 @@ SECTION .data			; Section containing initialised data
 	errorMsg: db 'ERROR!!!',10
 	errorLen: equ $ -errorMsg
 
-SECTION .bss			;	
+SECTION .bss				
 	SIZE: equ 1024
-	buffer: resb SIZE	;
+	buffer: resb SIZE	
 
 SECTION .text			; Section containing code
 
