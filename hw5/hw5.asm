@@ -35,8 +35,7 @@ _start:
 	  cmp ecx,ebx			 ;compare counter and buffer size
 	  je _checkStkEmpty              ;end of buffer check stack
 
-	  ;Parse buffer, put open brackets on stack for comparison when
-	  ; closed brackets are parsed is compared to top of stack
+	  ;Parse buffer, put open brackets on stack for comparison.
 	  cmp byte [buffer+ebx],'{'      ; Compare, push if matched
 	  je _openPush
 	 
