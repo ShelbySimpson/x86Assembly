@@ -7,9 +7,9 @@ SECTION .data			; Section containing initialised data
 	errorMsg: db 'ERROR!!!',10
 	errorLen: equ $ -errorMsg
 
-SECTION .bss				
+SECTION .bss			;	
 	SIZE: equ 1024
-	buffer: resb SIZE	
+	buffer: resb SIZE	;
 
 SECTION .text			; Section containing code
 
@@ -28,8 +28,8 @@ _start:
 	mov ebx, 0		; ebx stores loop counter
 	push 45			; Mark Stack Empty
 
-	_loop
-	  mov eax,[buffer+ebx]		 ; Stack Value
+	_loop:
+	  mov eax,[buffer+ebx]		 ; Buffer postion Value 
 	  mov edx,0			 ; ensure edx is 0
 	  mov dl,al 			 ; prep edx to push on stack 
 	  cmp ecx,ebx			 ;compare counter and buffer size
@@ -49,35 +49,48 @@ _start:
 	  ; Parse buffer, compare closed bracket with top of stack.
 	  ; No match means unbalanced parenthesis
 	  cmp byte[buffer+ebx],'}'	 ;compare for stack comparison
-	  je _stackCmp			 ;jump to stackCmp
+	  je _stackCmp1			 ;jump to stackCmp
  
 	  cmp byte[buffer+ebx],')'	 ;compare for stack comparison
-	  je _stackCmp			 ;jump to stackCmp
+	  je _stackCmp2			 ;jump to stackCmp
  
 	  cmp byte[buffer+ebx],']'	 ;compare for stack comparison
-	  je _stackCmp			 ;jump to stackCmp 
+	  je _stackCmp3			 ;jump to stackCmp 
 
 	 
 	  inc ebx			 ; increment loop counter
 	  jmp _loop
 
 	; Stack comparison implementation
-	_stackCmp			
+	_stackCmp1:			
 	  inc ebx		       	; increment loop counter
 	  pop eax		       	; pop to eax
+
 	  cmp eax,'{'			; match back to loop
+	  je  _loop
+
+	  jmp _errorEndProgram
+			
+	_stackCmp2:			
+	  inc ebx		       	; increment loop counter
+	  pop eax		       	; pop to eax
+
+	  cmp eax,'('			; match back to loop
+	  je  _loop
+
+	  jmp _errorEndProgram
+			
+	_stackCmp3:			
+	  inc ebx		       	; increment loop counter
+	  pop eax		       	; pop to eax
+
+	  cmp eax,'['			; match back to loop
 	  je  _loop			
-
-	  cmp eax,'('			;match back to loop
-	  je  _loop
-
-	  cmp eax,'['			;match back to loop
-	  je  _loop
 
 	  jmp _errorEndProgram
 
 	; Push open bracket to stack implementation
-	_openPush
+	_openPush:
 	  push edx			; push bracket to stack
 	  inc ebx			; incremtent counter
 	  jmp _loop			; back to loop
@@ -86,14 +99,14 @@ _start:
 	; stack is empty then all open bracket have been use and 
 	; parenthesis were balanced. If not, unbalanced and display
 	; error message.
-	_checkStkEmpty
+	_checkStkEmpty:
 	  pop eax			; pop for comparison	
 	  cmp eax,45			; check if stack is empty
 	  je _endProgram		; stack is empty
 	  jmp _errorEndProgram		; stack is not empty
 	
 	; End program, parenthesis balanced
-	_endProgram
+	_endProgram:
 	  mov eax,4		; Write to standard output
 	  mov ebx,1		; file descriptor 1 standard output
 	  mov ecx,buffer	; pointer to buffer
@@ -104,7 +117,7 @@ _start:
 	  int 80H		; Make kernel call
 
 	; End program, parenthesis not balanced.
-	_errorEndProgram
+	_errorEndProgram:
 	  mov eax,4		; Write to standard output
 	  mov ebx,1		; file descriptor 1 Standard output
 	  mov ecx,errorMsg	; pointer to bytes to write
@@ -112,5 +125,5 @@ _start:
 	  int 80H		; Make kernel call
 	  mov eax,1		; Code for Exit Syscall
 	  mov ebx,0		; Return a code of zero	
-	  int 80H		; Make kernel call
+	  int 80H			; Make kernel call
 
